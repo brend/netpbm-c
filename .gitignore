@@ -1,0 +1,42 @@
+# Ignore build directory (common convention)
+build/
+
+# CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+install_manifest.txt
+
+# Object files, archives, and executables
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+
+# Backup and swap files
+*~
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Compilation database files (optional)
+compile_commands.json
+
+# CLion or other CMake-based IDE files (optional)
+.idea/
+.vscode/
+
+# Testing outputs (optional, if you generate logs)
+Testing/
