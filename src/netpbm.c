@@ -112,10 +112,10 @@ NetpbmError netpbm_write_data(FILE *file, const NetpbmImage *img) {
         case NETPBM_TYPE_PBM:
             switch (img->format) {
                 case NETPBM_FORMAT_PLAIN:
-                    for (int i = 0; i < img->width * img->height / 8; i++) {
-                        if (fputc(img->data.bitmap_data[i], file) == EOF) {
+                    for (int i = 0; i < img->width * img->height; i++) {
+                        int bit = (img->data.bitmap_data[i / 8] >> (7 - (i % 8))) & 1;
+                        if (fprintf(file, "%d%c", bit, (i + 1) % img->width == 0 ? '\n' : ' ') < 0)
                             return NETPBM_ERROR_IO;
-                        }
                     }
                     return NETPBM_SUCCESS;
                 case NETPBM_FORMAT_RAW:
@@ -127,9 +127,8 @@ NetpbmError netpbm_write_data(FILE *file, const NetpbmImage *img) {
             switch (img->format) {
                 case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
-                        if (fputc(img->data.gray_data[i], file) == EOF) {
+                        if (fprintf(file, "%d%c", img->data.gray_data[i], (i + 1) % img->width == 0 ? '\n' : ' ') < 0)
                             return NETPBM_ERROR_IO;
-                        }
                     }
                     return NETPBM_SUCCESS;
                 case NETPBM_FORMAT_RAW:
@@ -140,12 +139,12 @@ NetpbmError netpbm_write_data(FILE *file, const NetpbmImage *img) {
         case NETPBM_TYPE_PPM:
             switch (img->format) {
                 case NETPBM_FORMAT_PLAIN:
-                    for (int i = 0; i < img->width * img->height; i++) {
-                        if (fputc(img->data.color_data[i].r, file) == EOF) return NETPBM_ERROR_IO;
-                        if (fputc(img->data.color_data[i].g, file) == EOF) return NETPBM_ERROR_IO;
-                        if (fputc(img->data.color_data[i].b, file) == EOF) return NETPBM_ERROR_IO;
-                    }
-                    return NETPBM_SUCCESS;
+                for (int i = 0; i < img->width * img->height; i++) {
+                    NetpbmColor c = img->data.color_data[i];
+                    if (fprintf(file, "%d %d %d%c", c.r, c.g, c.b, (i + 1) % img->width == 0 ? '\n' : ' ') < 0)
+                        return NETPBM_ERROR_IO;
+                }
+                return NETPBM_SUCCESS;
                 case NETPBM_FORMAT_RAW:
                     return fwrite(img->data.color_data, sizeof(NetpbmColor), img->width * img->height, file) > 0 ? NETPBM_SUCCESS : NETPBM_ERROR_IO;
                 default:
@@ -222,8 +221,11 @@ NetpbmError netpbm_read_data(FILE *file, NetpbmImage *img) {
         case NETPBM_TYPE_PBM:
             switch (img->format) {
                 case NETPBM_FORMAT_PLAIN:
-                    for (int i = 0; i < img->width * img->height / 8; i++) {
-                        img->data.bitmap_data[i] = fgetc(file);
+                    for (int i = 0; i < img->width * img->height; i++) {
+                        int val;
+                        if (fscanf(file, "%d", &val) != 1) return -1;
+                        if (val != 0 && val != 1) return -1;
+                        if (val) img->data.bitmap_data[i / 8] |= (1 << (7 - (i % 8)));
                     }
                     return NETPBM_SUCCESS;
                 case NETPBM_FORMAT_RAW:
@@ -241,7 +243,9 @@ NetpbmError netpbm_read_data(FILE *file, NetpbmImage *img) {
             switch (img->format) {
                 case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
-                        img->data.gray_data[i] = fgetc(file);
+                        int val;
+                        if (fscanf(file, "%d", &val) != 1) return NETPBM_ERROR_IO;
+                        img->data.gray_data[i] = (unsigned char)val;
                     }
                     return NETPBM_SUCCESS;
                 case NETPBM_FORMAT_RAW: 
@@ -259,11 +263,13 @@ NetpbmError netpbm_read_data(FILE *file, NetpbmImage *img) {
             switch (img->format) {
                 case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
-                        img->data.color_data[i].r = fgetc(file);
-                        img->data.color_data[i].g = fgetc(file);
-                        img->data.color_data[i].b = fgetc(file);
+                        int r, g, b;
+                        if (fscanf(file, "%d %d %d", &r, &g, &b) != 3) return NETPBM_ERROR_IO;
+                        img->data.color_data[i].r = (unsigned char)r;
+                        img->data.color_data[i].g = (unsigned char)g;
+                        img->data.color_data[i].b = (unsigned char)b;
                     }
-                    return 0;
+                    return NETPBM_SUCCESS;
                 case NETPBM_FORMAT_RAW:
                 {
                     size_t size = img->width * img->height * sizeof(NetpbmColor);
@@ -288,6 +294,7 @@ NetpbmError netpbm_load(const char *filename, NetpbmImage **img) {
 
     char header[3];
     if (fgets(header, sizeof(header), file) == NULL) {
+        fprintf(stderr, "Error reading header from file: %s\n", filename);
         fclose(file);
         return NETPBM_ERROR_INVALID_DATA;
     }
@@ -322,12 +329,14 @@ NetpbmError netpbm_load(const char *filename, NetpbmImage **img) {
 
     // Read width and height
     if (fscanf(file, "%d %d", &width, &height) != 2) {
+        fprintf(stderr, "Error reading width and height from file: %s\n", filename);
         fclose(file);
         return NETPBM_ERROR_INVALID_DATA;
     }
 
     // Read max value for PGM and PPM
     if (type != NETPBM_TYPE_PBM && fscanf(file, "%d", &max_value) != 1) {
+        fprintf(stderr, "Error reading max value from file: %s\n", filename);
         fclose(file);
         return NETPBM_ERROR_INVALID_DATA;
     }
@@ -342,6 +351,7 @@ NetpbmError netpbm_load(const char *filename, NetpbmImage **img) {
     // Read the image data
     NetpbmError err = netpbm_read_data(file, *img);
     if (err != NETPBM_SUCCESS) {
+        fprintf(stderr, "Error reading image data from file: %s\n", filename);
         netpbm_free(img);
         fclose(file);
         return err;

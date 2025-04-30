@@ -9,7 +9,7 @@
  */
 int main() {
     NetpbmImage *img = NULL;
-    NetpbmError err = netpbm_load("/Users/waldrumpus/Downloads/sample-pgm-files-sample_5184x3456.pgm", &img);
+    NetpbmError err = netpbm_load("/Users/waldrumpus/code/pbm/ascii.pgm", &img);
     
     if (err != NETPBM_SUCCESS) {
         fprintf(stderr, "Failed to load image: %d\n", err);
@@ -19,7 +19,7 @@ int main() {
     printf("Image width: %d, height: %d\n", img->width, img->height);
 
     // Example of modifying the image data: Rotate the image 90 degrees
-    NetpbmImage *copy = netpbm_create(NETPBM_TYPE_PGM, NETPBM_FORMAT_RAW, img->height, img->width, 255);
+    NetpbmImage *copy = netpbm_create_ex(NETPBM_TYPE_PGM, NETPBM_FORMAT_PLAIN, img->height, img->width, img->max_value, 0);
 
     if (copy == NULL) {
         fprintf(stderr, "Failed to create copy of image\n");
@@ -29,7 +29,9 @@ int main() {
     // Rotate the image 90 degrees clockwise
     for (int y = 0; y < img->height; y++) {
         for (int x = 0; x < img->width; x++) {
-            copy->data.gray_data[x * img->height + (img->height - 1 - y)] = img->data.gray_data[y * img->width + x];
+            int new_x = img->height - 1 - y;
+            int new_y = x;
+            copy->data.gray_data[new_y * copy->width + new_x] = img->data.gray_data[y * img->width + x];
         }
     }
     // Save the rotated image
