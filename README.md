@@ -108,12 +108,12 @@ typedef struct {
 
 |Code|Description|
 |----|-----------|
-|NETPBM_SUCCESS|Operation completed successfully|
-|NETPBM_ERROR_IO|File I/O error|
-|NETPBM_ERROR_UNSUPPORTED_FORMAT|Unsupported file format|
-|NETPBM_ERROR_UNSUPPORTED_TYPE|Unsupported image type|
-|NETPBM_ERROR_INVALID_DATA|Malformed file or header|
-|NETPBM_ERROR_MEMORY_ALLOCATION|Out of memory|
+|`NETPBM_SUCCESS`|Operation completed successfully|
+|`NETPBM_ERROR_IO`|File I/O error|
+|`NETPBM_ERROR_UNSUPPORTED_FORMAT`|Unsupported file format|
+|`NETPBM_ERROR_UNSUPPORTED_TYPE`|Unsupported image type|
+|`NETPBM_ERROR_INVALID_DATA`|Malformed file or header|
+|`NETPBM_ERROR_MEMORY_ALLOCATION`|Out of memory|
 
 ## License
 
