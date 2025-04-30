@@ -28,10 +28,10 @@ NetpbmImage *netpbm_create_ex(
     // Allocate memory for the image data
     switch (type) {
         case PBM:
-            img->data.bitmap_data = (byte *)malloc(width * height / 8);
+            img->data.bitmap_data = (unsigned char *)malloc(width * height / 8);
             break;
         case PGM:
-            img->data.gray_data = (byte *)malloc(width * height * (max_value > 255 ? 2 : 1));
+            img->data.gray_data = (unsigned char *)malloc(width * height * (max_value > 255 ? 2 : 1));
             break;
         case PPM:
             img->data.color_data = (Color *)malloc(width * height * sizeof(Color));

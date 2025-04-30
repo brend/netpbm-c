@@ -1,9 +1,6 @@
 #ifndef NETPBM_H
 #define NETPBM_H
 
-/** convenience type defintion of byte */
-typedef unsigned char byte;
-
 /**
  * @brief Enumeration of Netpbm image types.
  * 
@@ -40,11 +37,11 @@ typedef enum {
  */
 typedef struct {
     /// Red component
-    byte r;
+    unsigned char r;
     /// Green component
-    byte g;
+    unsigned char g;
     /// Blue component
-    byte b;
+    unsigned char b;
 } Color;
 
 /**
@@ -74,9 +71,9 @@ typedef struct Image {
      */
     union {
         /// PBM: 1 byte per pixel (0 or 1)
-        byte *bitmap_data;
+        unsigned char *bitmap_data;
         /// PGM: 1 byte per pixel (or 2 bytes if max_value > 255)
-        byte *gray_data;
+        unsigned char *gray_data;
         /// PPM: 3 bytes per pixel
         Color *color_data;
     } data;
