@@ -3,6 +3,19 @@
 #include <string.h>
 #include <stdio.h>
 
+size_t netpbm_data_size(const NetpbmImage *img) {
+    switch (img->type) {
+        case NETPBM_TYPE_PBM:
+            return img->width * img->height / 8;
+        case NETPBM_TYPE_PGM:
+            return img->width * img->height * (img->max_value > 255 ? 2 : 1);
+        case NETPBM_TYPE_PPM:
+            return img->width * img->height * sizeof(NetpbmColor);
+        default:
+            return 0; // Unsupported type
+    }
+}
+
 NetpbmImage *netpbm_create_ex(
     NetpbmType type, 
     NetpbmFormat format, 
@@ -26,15 +39,17 @@ NetpbmImage *netpbm_create_ex(
     img->max_value = max_value;
 
     // Allocate memory for the image data
+    size_t data_size = netpbm_data_size(img);
+    void *data = malloc(data_size);
     switch (type) {
         case NETPBM_TYPE_PBM:
-            img->data.bitmap_data = (unsigned char *)malloc(width * height / 8);
+            img->data.bitmap_data = (unsigned char *)data;
             break;
         case NETPBM_TYPE_PGM:
-            img->data.gray_data = (unsigned char *)malloc(width * height * (max_value > 255 ? 2 : 1));
+            img->data.gray_data = (unsigned char *)data;
             break;
         case NETPBM_TYPE_PPM:
-            img->data.color_data = (NetpbmColor *)malloc(width * height * sizeof(NetpbmColor));
+            img->data.color_data = (NetpbmColor *)data;
             break;
         default:
             free(img);
@@ -49,19 +64,16 @@ NetpbmImage *netpbm_create_ex(
 
     // Initialize the image data
     if (zero_fill != 0) {
+        size_t size = netpbm_data_size(img);
         switch (type) {
             case NETPBM_TYPE_PBM:
-                memset(img->data.bitmap_data, 0, width * height / 8);
+                memset(img->data.bitmap_data, 0, size);
                 break;
             case NETPBM_TYPE_PGM:
-                memset(img->data.gray_data, 0, width * height * (max_value > 255 ? 2 : 1));
+                memset(img->data.gray_data, 0, size);
                 break;
             case NETPBM_TYPE_PPM:
-                for (int i = 0; i < width * height; i++) {
-                    img->data.color_data[i].r = 0;
-                    img->data.color_data[i].g = 0;
-                    img->data.color_data[i].b = 0;
-                }
+                memset(img->data.color_data, 0, size);
                 break;
         }
     }
