@@ -2,7 +2,7 @@
 
 A lightweight C library for loading, manipulating, and saving **Netpbm** image formats: **PBM**, **PGM**, and **PPM** in both **plain (ASCII)** and **raw (binary)** variants.
 
-<img src="assets/sample.pgm" alt="sample grayscale image">
+<img src="assets/sample.png" alt="sample grayscale image">
 
 ## Features
 
