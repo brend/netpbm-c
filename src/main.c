@@ -38,7 +38,8 @@ int main() {
                 netpbm_free(&img);
                 return EXIT_FAILURE;
             }
-            copy->data.gray_data[new_y * copy->width + new_x] = (unsigned char)pixel_value;
+            // Set the pixel value in the rotated image
+            netpbm_set_gray(copy, new_x, new_y, pixel_value);
         }
     }
     // Save the rotated image
