@@ -2,6 +2,29 @@
 #define NETPBM_H
 
 /**
+ * @file netpbm.h
+ * @brief Header file for Netpbm image handling.
+ *
+ * This file contains the definitions and function prototypes for creating,
+ * manipulating, and saving Netpbm images.
+ *
+ * @note This library supports PBM, PGM, and PPM formats.
+ */
+
+ /**
+  * @brief Enumeration of error codes for Netpbm operations.
+  */
+ typedef enum {
+    NETPBM_SUCCESS = 0,
+    NETPBM_ERROR_MEMORY_ALLOCATION = -1,
+    NETPBM_ERROR_FILE_NOT_FOUND = -2,
+    NETPBM_ERROR_UNSUPPORTED_FORMAT = -3,
+    NETPBM_ERROR_INVALID_DATA = -4,
+    NETPBM_ERROR_IO = -5,
+    NETPBM_ERROR_UNSUPPORTED_TYPE = -6,
+ } NetpbmError;
+
+/**
  * @brief Enumeration of Netpbm image types.
  * 
  * The type of the image determines the color depth and format.
@@ -135,9 +158,9 @@ void netpbm_free(NetpbmImage **img);
  *
  * @param img Pointer to the NetpbmImage to be saved.
  * @param filename The name of the file to save the image to.
- * @return 0 on success, or -1 on failure.
+ * @return Success or failure code.
  */
-int netpbm_save(const NetpbmImage *img, const char *filename);
+NetpbmError netpbm_save(const NetpbmImage *img, const char *filename);
 
 /**
  * @brief Loads a Netpbm image from a file.
@@ -146,8 +169,8 @@ int netpbm_save(const NetpbmImage *img, const char *filename);
  *
  * @param filename The name of the file to load the image from.
  * @param img Pointer to the pointer of the NetpbmImage to be populated. Will be allocated if NULL.
- * @return 0 on success, or -1 on failure.
+ * @return Success or failure code.
  */
-int netpbm_load(const char *filename, NetpbmImage **img);
+NetpbmError netpbm_load(const char *filename, NetpbmImage **img);
 
 #endif
