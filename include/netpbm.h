@@ -9,11 +9,11 @@
  */
 typedef enum {
     /// Bitmap (black and white)
-    PBM,
+    NETPBM_TYPE_PBM,
     /// Grayscale
-    PGM,
+    NETPBM_TYPE_PGM,
     /// Color
-    PPM
+    NETPBM_TYPE_PPM
 } NetpbmType;
 
 /**
@@ -24,9 +24,9 @@ typedef enum {
  */
 typedef enum {
     /// ASCII pixel format */
-    PLAIN,
+    NETPBM_FORMAT_PLAIN,
     /// Binary pixel format */
-    RAW
+    NETPBM_FORMAT_RAW
 } NetpbmFormat;
 
 /**
@@ -42,7 +42,7 @@ typedef struct {
     unsigned char g;
     /// Blue component
     unsigned char b;
-} Color;
+} NetpbmColor;
 
 /**
  * @brief Structure representing a Netpbm image.
@@ -75,7 +75,7 @@ typedef struct Image {
         /// PGM: 1 byte per pixel (or 2 bytes if max_value > 255)
         unsigned char *gray_data;
         /// PPM: 3 bytes per pixel
-        Color *color_data;
+        NetpbmColor *color_data;
     } data;
 } NetpbmImage;
 

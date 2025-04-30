@@ -14,7 +14,7 @@ int main() {
         printf("Image width: %d, height: %d\n", img->width, img->height);
 
         // Example of modifying the image data: Rotate the image 90 degrees
-        NetpbmImage *copy = netpbm_create(PGM, RAW, img->height, img->width, 255);
+        NetpbmImage *copy = netpbm_create(NETPBM_TYPE_PGM, NETPBM_FORMAT_RAW, img->height, img->width, 255);
         for (int y = 0; y < img->height; y++) {
             for (int x = 0; x < img->width; x++) {
                 copy->data.gray_data[x * img->height + (img->height - 1 - y)] = img->data.gray_data[y * img->width + x];

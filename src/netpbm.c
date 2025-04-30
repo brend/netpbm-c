@@ -27,14 +27,14 @@ NetpbmImage *netpbm_create_ex(
 
     // Allocate memory for the image data
     switch (type) {
-        case PBM:
+        case NETPBM_TYPE_PBM:
             img->data.bitmap_data = (unsigned char *)malloc(width * height / 8);
             break;
-        case PGM:
+        case NETPBM_TYPE_PGM:
             img->data.gray_data = (unsigned char *)malloc(width * height * (max_value > 255 ? 2 : 1));
             break;
-        case PPM:
-            img->data.color_data = (Color *)malloc(width * height * sizeof(Color));
+        case NETPBM_TYPE_PPM:
+            img->data.color_data = (NetpbmColor *)malloc(width * height * sizeof(NetpbmColor));
             break;
         default:
             free(img);
@@ -50,13 +50,13 @@ NetpbmImage *netpbm_create_ex(
     // Initialize the image data
     if (zero_fill != 0) {
         switch (type) {
-            case PBM:
+            case NETPBM_TYPE_PBM:
                 memset(img->data.bitmap_data, 0, width * height / 8);
                 break;
-            case PGM:
+            case NETPBM_TYPE_PGM:
                 memset(img->data.gray_data, 0, width * height * (max_value > 255 ? 2 : 1));
                 break;
-            case PPM:
+            case NETPBM_TYPE_PPM:
                 for (int i = 0; i < width * height; i++) {
                     img->data.color_data[i].r = 0;
                     img->data.color_data[i].g = 0;
@@ -76,13 +76,13 @@ NetpbmImage *netpbm_create(NetpbmType type, NetpbmFormat format, int width, int 
 void netpbm_free(NetpbmImage **img) {
     if (*img != NULL) {
         switch ((*img)->type) {
-            case PBM:
+            case NETPBM_TYPE_PBM:
                 free((*img)->data.bitmap_data);
                 break;
-            case PGM:
+            case NETPBM_TYPE_PGM:
                 free((*img)->data.gray_data);
                 break;
-            case PPM:
+            case NETPBM_TYPE_PPM:
                 free((*img)->data.color_data);
                 break;
         }
@@ -93,43 +93,43 @@ void netpbm_free(NetpbmImage **img) {
 
 int netpbm_write_data(FILE *file, const NetpbmImage *img) {
     switch (img->type) {
-        case PBM:
+        case NETPBM_TYPE_PBM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height / 8; i++) {
                         if (fputc(img->data.bitmap_data[i], file) == EOF) {
                             return -1;
                         }
                     }
                     return 0;
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fwrite(img->data.bitmap_data, 1, img->width * img->height / 8, file);
             }
             break;
-        case PGM:
+        case NETPBM_TYPE_PGM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
                         if (fputc(img->data.gray_data[i], file) == EOF) {
                             return -1;
                         }
                     }
                     return 0;
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fwrite(img->data.gray_data, img->max_value > 255 ? 2 : 1, img->width * img->height, file);
             }
             break;
-        case PPM:
+        case NETPBM_TYPE_PPM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
                         if (fputc(img->data.color_data[i].r, file) == EOF) return -1;
                         if (fputc(img->data.color_data[i].g, file) == EOF) return -1;
                         if (fputc(img->data.color_data[i].b, file) == EOF) return -1;
                     }
                     return 0;
-                case RAW:
-                    return fwrite(img->data.color_data, sizeof(Color), img->width * img->height, file);
+                case NETPBM_FORMAT_RAW:
+                    return fwrite(img->data.color_data, sizeof(NetpbmColor), img->width * img->height, file);
             }
             break;
     }
@@ -139,27 +139,27 @@ int netpbm_write_data(FILE *file, const NetpbmImage *img) {
 
 int netpbm_write_header(FILE *file, const NetpbmImage *img) {
     switch (img->type) {
-        case PBM:
+        case NETPBM_TYPE_PBM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     return fprintf(file, "P1\n%d %d\n", img->width, img->height);
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fprintf(file, "P4\n%d %d\n", img->width, img->height);
             }
             break;
-        case PGM:
+        case NETPBM_TYPE_PGM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     return fprintf(file, "P2\n%d %d\n%d\n", img->width, img->height, img->max_value);
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fprintf(file, "P5\n%d %d\n%d\n", img->width, img->height, img->max_value);
             }
             break;
-        case PPM:
+        case NETPBM_TYPE_PPM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     return fprintf(file, "P3\n%d %d\n%d\n", img->width, img->height, img->max_value);
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fprintf(file, "P6\n%d %d\n%d\n", img->width, img->height, img->max_value);
             }
             break;
@@ -192,39 +192,39 @@ int netpbm_save(const NetpbmImage *img, const char *filename) {
 
 int netpbm_read_data(FILE *file, NetpbmImage *img) {
     switch (img->type) {
-        case PBM:
+        case NETPBM_TYPE_PBM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height / 8; i++) {
                         img->data.bitmap_data[i] = fgetc(file);
                     }
                     return 0;
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fread(img->data.bitmap_data, 1, img->width * img->height / 8, file);
             }
             break;
-        case PGM:
+        case NETPBM_TYPE_PGM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
                         img->data.gray_data[i] = fgetc(file);
                     }
                     return 0;
-                case RAW:
+                case NETPBM_FORMAT_RAW:
                     return fread(img->data.gray_data, img->max_value > 255 ? 2 : 1, img->width * img->height, file);
             }
             break;
-        case PPM:
+        case NETPBM_TYPE_PPM:
             switch (img->format) {
-                case PLAIN:
+                case NETPBM_FORMAT_PLAIN:
                     for (int i = 0; i < img->width * img->height; i++) {
                         img->data.color_data[i].r = fgetc(file);
                         img->data.color_data[i].g = fgetc(file);
                         img->data.color_data[i].b = fgetc(file);
                     }
                     return 0;
-                case RAW:
-                    return fread(img->data.color_data, sizeof(Color), img->width * img->height, file);
+                case NETPBM_FORMAT_RAW:
+                    return fread(img->data.color_data, sizeof(NetpbmColor), img->width * img->height, file);
             }
             break;
     }
@@ -248,23 +248,23 @@ int netpbm_load(const char *filename, NetpbmImage **img) {
     NetpbmFormat format;
 
     if (strcmp(header, "P1") == 0) {
-        type = PBM;
-        format = PLAIN;
+        type = NETPBM_TYPE_PBM;
+        format = NETPBM_FORMAT_PLAIN;
     } else if (strcmp(header, "P4") == 0) {
-        type = PBM;
-        format = RAW;
+        type = NETPBM_TYPE_PBM;
+        format = NETPBM_FORMAT_RAW;
     } else if (strcmp(header, "P2") == 0) {
-        type = PGM;
-        format = PLAIN;
+        type = NETPBM_TYPE_PGM;
+        format = NETPBM_FORMAT_PLAIN;
     } else if (strcmp(header, "P5") == 0) {
-        type = PGM;
-        format = RAW;
+        type = NETPBM_TYPE_PGM;
+        format = NETPBM_FORMAT_RAW;
     } else if (strcmp(header, "P3") == 0) {
-        type = PPM;
-        format = PLAIN;
+        type = NETPBM_TYPE_PPM;
+        format = NETPBM_FORMAT_PLAIN;
     } else if (strcmp(header, "P6") == 0) {
-        type = PPM;
-        format = RAW;
+        type = NETPBM_TYPE_PPM;
+        format = NETPBM_FORMAT_RAW;
     } else {
         fclose(file);
         return -1; // Unsupported format
@@ -279,7 +279,7 @@ int netpbm_load(const char *filename, NetpbmImage **img) {
     }
 
     // Read max value for PGM and PPM
-    if (type != PBM && fscanf(file, "%d", &max_value) != 1) {
+    if (type != NETPBM_TYPE_PBM && fscanf(file, "%d", &max_value) != 1) {
         fclose(file);
         return -1; // Error reading max value
     }
