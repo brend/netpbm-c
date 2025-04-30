@@ -9,7 +9,7 @@
  */
 int main() {
     NetpbmImage *img = NULL;
-    NetpbmError err = netpbm_load("/Users/waldrumpus/code/pbm/ascii.pgm", &img);
+    NetpbmError err = netpbm_load("../assets/sample.pgm", &img);
     
     if (err != NETPBM_SUCCESS) {
         fprintf(stderr, "Failed to load image: %d\n", err);
@@ -31,7 +31,14 @@ int main() {
         for (int x = 0; x < img->width; x++) {
             int new_x = img->height - 1 - y;
             int new_y = x;
-            copy->data.gray_data[new_y * copy->width + new_x] = img->data.gray_data[y * img->width + x];
+            int pixel_value = netpbm_get_gray(img, x, y);
+            if (pixel_value < 0) {
+                fprintf(stderr, "Failed to get pixel value at (%d, %d)\n", x, y);
+                netpbm_free(&copy);
+                netpbm_free(&img);
+                return EXIT_FAILURE;
+            }
+            copy->data.gray_data[new_y * copy->width + new_x] = (unsigned char)pixel_value;
         }
     }
     // Save the rotated image

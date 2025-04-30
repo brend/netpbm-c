@@ -173,4 +173,28 @@ NetpbmError netpbm_save(const NetpbmImage *img, const char *filename);
  */
 NetpbmError netpbm_load(const char *filename, NetpbmImage **img);
 
+/**
+ * @brief Get a grayscale value at (x, y). Only for PGM.
+ * @return Pixel value on success, < 0 on error.
+ */
+int netpbm_get_gray(const NetpbmImage* img, int x, int y);
+
+/**
+ * @brief Set a grayscale value at (x, y). Only for PGM.
+ * @return 0 on success, non-zero on error.
+ */
+int netpbm_set_gray(NetpbmImage* img, int x, int y, unsigned char value);
+
+/**
+ * @brief Get an RGB pixel at (x, y). Only for PPM.
+ * @return 0 on success, non-zero on error.
+ */
+int netpbm_get_color(const NetpbmImage* img, int x, int y, NetpbmColor* out);
+
+/**
+ * @brief Set an RGB pixel at (x, y). Only for PPM.
+ * @return 0 on success, non-zero on error.
+ */
+int netpbm_set_color(NetpbmImage* img, int x, int y, NetpbmColor color);
+
 #endif

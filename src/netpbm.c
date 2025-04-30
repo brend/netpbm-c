@@ -360,3 +360,30 @@ NetpbmError netpbm_load(const char *filename, NetpbmImage **img) {
     fclose(file);
     return NETPBM_SUCCESS;
 }
+
+int netpbm_get_gray(const NetpbmImage* img, int x, int y) {
+    if (!img || img->type != NETPBM_TYPE_PGM || x < 0 || y < 0 || x >= img->width || y >= img->height)
+        return -1;
+    return img->data.gray_data[y * img->width + x];
+}
+
+int netpbm_set_gray(NetpbmImage* img, int x, int y, unsigned char value) {
+    if (!img || img->type != NETPBM_TYPE_PGM || x < 0 || y < 0 || x >= img->width || y >= img->height)
+        return -1;
+    img->data.gray_data[y * img->width + x] = value;
+    return 0;
+}
+
+int netpbm_get_color(const NetpbmImage* img, int x, int y, NetpbmColor* out) {
+    if (!img || img->type != NETPBM_TYPE_PPM || x < 0 || y < 0 || x >= img->width || y >= img->height)
+        return -1;
+    *out = img->data.color_data[y * img->width + x];
+    return 0;
+}
+
+int netpbm_set_color(NetpbmImage* img, int x, int y, NetpbmColor color) {
+    if (!img || img->type != NETPBM_TYPE_PPM || x < 0 || y < 0 || x >= img->width || y >= img->height)
+        return -1;
+    img->data.color_data[y * img->width + x] = color;
+    return 0;
+}
