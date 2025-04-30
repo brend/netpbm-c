@@ -86,6 +86,10 @@ NetpbmImage *netpbm_create(NetpbmType type, NetpbmFormat format, int width, int 
 }
 
 void netpbm_free(NetpbmImage **img) {
+    if (img == NULL || *img == NULL) {
+        return;
+    }
+    
     if (*img != NULL) {
         switch ((*img)->type) {
             case NETPBM_TYPE_PBM:
