@@ -98,11 +98,11 @@ typedef struct {
 ````
 ### Functions
 
-- NetpbmImage* netpbm_create(...)
-- NetpbmImage* netpbm_create_ex(...)
-- void netpbm_free(NetpbmImage** img)
-- NetpbmError netpbm_load(const char* path, NetpbmImage** img)
-- NetpbmError netpbm_save(const NetpbmImage* img, const char* path)
+- `NetpbmImage* netpbm_create(...)`
+- `NetpbmImage* netpbm_create_ex(...)`
+- `void netpbm_free(NetpbmImage** img)`
+- `NetpbmError netpbm_load(const char* path, NetpbmImage** img)`
+- `NetpbmError netpbm_save(const NetpbmImage* img, const char* path)`
 
 ## Error Codes
 
